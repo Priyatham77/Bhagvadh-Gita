@@ -77,11 +77,11 @@ def get_mentor_response(user_query: str):
         {"role": "user", "content": f"User Dilemma: \"{user_query}\"\n\nRetrieved Gita Verses:\n{context_str}\n\nProvide your counsel:"}
     ]
 
-    # Verified production chat models only (no classifiers or guards)
+    # Active production chat models on Groq
     candidate_models = [
-        "llama-3.3-70b-versatile",
-        "mixtral-8x7b-32768",
-        "gemma2-9b-it"
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "llama-3.3-70b-versatile"
     ]
 
     last_error = None
@@ -95,7 +95,7 @@ def get_mentor_response(user_query: str):
             return completion.choices[0].message.content, retrieved_meta
         except Exception as e:
             last_error = e
-            continue  # Try next production model if one is busy or unavailable
+            continue
 
     return f"⚠️ **API Request Error**: {str(last_error)}", retrieved_meta
 
