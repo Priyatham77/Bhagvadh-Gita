@@ -83,15 +83,18 @@ def get_mentor_response(user_query: str):
     Provide your counsel following your system instructions.
     """
 
-    response = ai_client.models.generate_content(
-        model="gemini-1.5-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            temperature=0.6,
+    try:
+        response = ai_client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                temperature=0.6,
+            )
         )
-    )
-    return response.text, retrieved_meta
+        return response.text, retrieved_meta
+    except Exception as e:
+        return f"⚠️ **API Request Error**: {str(e)}\n\nPlease verify that your `GEMINI_API_KEY` in Streamlit Cloud Secrets is valid and has access to `gemini-1.5-flash`.", retrieved_meta
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
