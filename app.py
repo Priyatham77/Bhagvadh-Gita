@@ -1,8 +1,7 @@
 import streamlit as st
 import chromadb
 from chromadb.utils import embedding_functions
-from google import genai
-from google.genai import types
+from groq import Groq
 from gita_data import GITA_VERSES
 
 st.set_page_config(
@@ -14,12 +13,12 @@ st.set_page_config(
 st.title("🪷 Gita AI")
 st.caption("Timeless wisdom from the Bhagavad Gita applied to modern life dilemmas.")
 
-# Check for API key in Streamlit secrets
-if "GEMINI_API_KEY" not in st.secrets:
-    st.error("Missing `GEMINI_API_KEY`. Please set it in Streamlit: Manage app -> App settings -> Secrets.")
+# Check for Groq API key in Streamlit secrets
+if "GROQ_API_KEY" not in st.secrets:
+    st.error("Missing `GROQ_API_KEY`. Please set it in Streamlit: Manage app -> App settings -> Secrets.")
     st.stop()
 
-api_key = st.secrets["GEMINI_API_KEY"]
+api_key = str(st.secrets["GROQ_API_KEY"]).strip().replace('"', '').replace("'", "")
 
 @st.cache_resource(show_spinner="Initializing vector store with Gita wisdom...")
 def init_system():
@@ -45,10 +44,10 @@ def init_system():
         ids=ids
     )
 
-    ai_client = genai.Client(api_key=api_key)
-    return collection, ai_client
+    client = Groq(api_key=api_key)
+    return collection, client
 
-collection, ai_client = init_system()
+collection, groq_client = init_system()
 
 SYSTEM_PROMPT = """
 You are a grounded, deeply compassionate life mentor who draws wisdom directly from the Bhagavad Gita.
@@ -73,28 +72,20 @@ def get_mentor_response(user_query: str):
         )
     context_str = "\n---\n".join(context_segments)
 
-    prompt = f"""
-    User's Dilemma:
-    "{user_query}"
-
-    Retrieved Gita Verses:
-    {context_str}
-
-    Provide your counsel following your system instructions.
-    """
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": f"User Dilemma: \"{user_query}\"\n\nRetrieved Gita Verses:\n{context_str}\n\nProvide your counsel:"}
+    ]
 
     try:
-        response = ai_client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.6,
-            )
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            temperature=0.6,
         )
-        return response.text, retrieved_meta
+        return completion.choices[0].message.content, retrieved_meta
     except Exception as e:
-        return f"⚠️ **API Request Error**: {str(e)}\n\nPlease verify that your `GEMINI_API_KEY` in Streamlit Cloud Secrets is valid and has access to `gemini-1.5-flash`.", retrieved_meta
+        return f"⚠️ **API Request Error**: {str(e)}", retrieved_meta
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
