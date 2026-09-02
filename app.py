@@ -78,19 +78,32 @@ def get_mentor_response(user_query: str):
     ]
 
     try:
-        # Dynamically fetch an active model from your Groq account
-        available_models = [m.id for m in groq_client.models.list().data]
+        # Fetch all models and filter strictly for standard chat/instruct models
+        all_models = [m.id for m in groq_client.models.list().data]
         
-        # Priority list of top models to use if present
+        # Priority list of reliable general-purpose text models
+        preferred_models = [
+            "llama-3.3-70b-versatile",
+            "llama-3.1-70b-versatile",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it"
+        ]
+
         target_model = None
-        for candidate in ["llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"]:
-            if candidate in available_models:
-                target_model = candidate
+        for cand in preferred_models:
+            if cand in all_models:
+                target_model = cand
                 break
-        
-        # Fallback to the very first available text model if none of the above match
-        if not target_model and available_models:
-            target_model = available_models[0]
+
+        # If none from preferred list match, pick the first Llama or Mixtral model only
+        if not target_model:
+            chat_candidates = [
+                m for m in all_models 
+                if ("llama" in m.lower() or "mixtral" in m.lower() or "gemma" in m.lower())
+                and "whisper" not in m.lower()
+                and "/" not in m  # skips gated third-party models like canopylabs/
+            ]
+            target_model = chat_candidates[0] if chat_candidates else all_models[0]
 
         completion = groq_client.chat.completions.create(
             model=target_model,
