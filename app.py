@@ -1,10 +1,9 @@
-import json
 import streamlit as st
-import requests
 import chromadb
 from chromadb.utils import embedding_functions
 from google import genai
 from google.genai import types
+from gita_data import GITA_VERSES
 
 st.set_page_config(
     page_title="Gita AI — Philosophical Mentor",
@@ -13,91 +12,62 @@ st.set_page_config(
 )
 
 st.title("🪷 Gita AI")
-st.caption("Timeless wisdom from the Bhagavad Gita for modern dilemmas.")
+st.caption("Timeless wisdom from the Bhagavad Gita applied to modern life dilemmas.")
 
-# Check for Gemini API Key in Streamlit Secrets
+# Check for API key in Streamlit secrets
 if "GEMINI_API_KEY" not in st.secrets:
-    st.error("Missing `GEMINI_API_KEY`. Please set it in Streamlit App Settings -> Secrets.")
+    st.error("Missing `GEMINI_API_KEY`. Please set it in Streamlit: Manage app -> App settings -> Secrets.")
     st.stop()
 
 api_key = st.secrets["GEMINI_API_KEY"]
 
-@st.cache_resource(show_spinner="Preparing Bhagavad Gita scripture database...")
+@st.cache_resource(show_spinner="Initializing vector store with Gita wisdom...")
 def init_system():
-    # 1. Fetch official open-source Gita verses
-    url = "https://raw.githubusercontent.com/vedicscriptures/bhagavad-gita-data/master/slok.json"
-    resp = requests.get(url, timeout=30)
-    raw_data = resp.json()
-
-    clean_verses = []
-    for item in raw_data:
-        chapter = item.get("chapter")
-        verse = item.get("verse")
-        sloka = item.get("slok", "")
-        transliteration = item.get("transliteration", "")
-        
-        translation = ""
-        if "siva" in item and "et" in item["siva"]:
-            translation = item["siva"]["et"]
-        elif "tej" in item and "et" in item["tej"]:
-            translation = item["tej"]["et"]
-
-        if chapter and verse and translation:
-            clean_verses.append({
-                "id": f"bg_{chapter}_{verse}",
-                "chapter": int(chapter),
-                "verse": int(verse),
-                "sloka": sloka.strip(),
-                "transliteration": transliteration.strip(),
-                "translation": translation.strip()
-            })
-
-    # 2. Initialize in-memory Vector Database
+    # In-memory ChromaDB vector store
     chroma_client = chromadb.Client()
     emb_fn = embedding_functions.DefaultEmbeddingFunction()
+    
     collection = chroma_client.create_collection(
         name="bhagavad_gita",
         embedding_function=emb_fn
     )
 
-    # 3. Index verses
-    documents = [f"Chapter {v['chapter']}, Verse {v['verse']}: {v['translation']}" for v in clean_verses]
-    metadatas = clean_verses
-    ids = [v["id"] for v in clean_verses]
+    documents = [
+        f"Chapter {v['chapter']}, Verse {v['verse']}. Themes: {v['theme']}. Meaning: {v['translation']}"
+        for v in GITA_VERSES
+    ]
+    metadatas = GITA_VERSES
+    ids = [v["id"] for v in GITA_VERSES]
 
-    # Batch insert to stay memory efficient
-    for i in range(0, len(clean_verses), 100):
-        collection.add(
-            documents=documents[i:i+100],
-            metadatas=metadatas[i:i+100],
-            ids=ids[i:i+100]
-        )
+    collection.add(
+        documents=documents,
+        metadatas=metadatas,
+        ids=ids
+    )
 
-    # 4. Initialize Gemini Client
     ai_client = genai.Client(api_key=api_key)
     return collection, ai_client
 
 collection, ai_client = init_system()
 
 SYSTEM_PROMPT = """
-You are a calm, compassionate life mentor grounded in the Bhagavad Gita.
-When a user asks for guidance on a life problem:
-1. Empathy: Warmly acknowledge their emotional state in 1-2 sincere sentences.
-2. Core Verse: Identify the most fitting verse from the provided context. State Chapter and Verse, provide the transliteration, and give a clear English translation.
-3. Philosophical Insight: Explain how the Gita's philosophy applies directly to their modern dilemma.
-4. Action Step: Provide one tangible, actionable practice they can execute today.
-Keep your tone peer-like, wise, and supportive. Avoid dogmatic or overly archaic language.
+You are a grounded, deeply compassionate life mentor who draws wisdom directly from the Bhagavad Gita.
+When a user asks for guidance on a personal problem:
+1. Empathy: Warmly acknowledge their feelings in 1-2 sincere sentences.
+2. Core Verse: Identify the best matching verse from the retrieved context. State Chapter and Verse, Sanskrit transliteration, and English translation.
+3. Philosophical Application: Explain how this verse applies to their exact modern dilemma (e.g., detachment from results, calming the restless mind, rising above grief).
+4. Practical Step: Give one simple, concrete action step or mindset exercise they can do today.
+Keep your tone warm, wise, peer-like, and supportive. Avoid dogmatic or preachy language.
 """
 
 def get_mentor_response(user_query: str):
-    # Vector semantic search
-    search = collection.query(query_texts=[user_query], n_results=3)
+    search = collection.query(query_texts=[user_query], n_results=2)
     retrieved_meta = search["metadatas"][0]
 
     context_segments = []
     for item in retrieved_meta:
         context_segments.append(
-            f"BG {item['chapter']}.{item['verse']}:\n"
+            f"BG {item['chapter']}.{item['verse']} (Themes: {item['theme']}):\n"
             f"Transliteration: {item['transliteration']}\n"
             f"Translation: {item['translation']}\n"
         )
@@ -107,7 +77,7 @@ def get_mentor_response(user_query: str):
     User's Dilemma:
     "{user_query}"
 
-    Retrieved Verses from Bhagavad Gita:
+    Retrieved Gita Verses:
     {context_str}
 
     Provide your counsel following your system instructions.
@@ -123,17 +93,16 @@ def get_mentor_response(user_query: str):
     )
     return response.text, retrieved_meta
 
-# Chat State Management
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Namaste. What situation or decision is weighing on your mind today?"}
+        {"role": "assistant", "content": "Namaste. What situation or challenge is on your mind today?"}
     ]
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-if prompt_input := st.chat_input("E.g., I worked hard but failed, how do I deal with disappointment?"):
+if prompt_input := st.chat_input("E.g., I'm terrified of failing my upcoming exams..."):
     st.session_state.messages.append({"role": "user", "content": prompt_input})
     with st.chat_message("user"):
         st.markdown(prompt_input)
