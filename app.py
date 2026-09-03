@@ -11,76 +11,110 @@ st.set_page_config(
 )
 
 # --- CINEMATIC VISUAL STYLING (CSS / CGI THEME) ---
+
 st.markdown("""
 <style>
-/* Main app background: cosmic gradient with atmospheric divine vignette */
+/* 1. Epic Cinematic Dark & Golden Sky Background */
 .stApp {
-    background: radial-gradient(circle at 50% 15%, rgba(26, 35, 126, 0.45) 0%, rgba(10, 15, 30, 0.95) 75%),
-                linear-gradient(180deg, #070b14 0%, #0d1527 50%, #050811 100%);
-    color: #e0e6ed;
+    background: 
+        radial-gradient(ellipse at 50% 18%, rgba(255, 140, 0, 0.22) 0%, rgba(15, 7, 2, 0.7) 45%, rgba(4, 5, 12, 0.98) 85%),
+        linear-gradient(180deg, #07060a 0%, #0d0a14 40%, #030408 100%);
+    background-attachment: fixed;
+    color: #e2e8f0;
     font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Header styling */
+/* 2. Mahavatar-style Golden Halo & Silhouette in the backdrop */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 650px;
+    height: 650px;
+    background: radial-gradient(circle, rgba(255, 191, 0, 0.28) 0%, rgba(255, 102, 0, 0.12) 40%, rgba(0,0,0,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(40px);
+    animation: divinePulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes divinePulse {
+    0% { transform: translateX(-50%) scale(0.92); opacity: 0.7; }
+    100% { transform: translateX(-50%) scale(1.15); opacity: 1; }
+}
+
+/* 3. Hero Header with Glowing Sanskrit Typography */
 .gita-title {
     text-align: center;
-    font-size: 2.6rem;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    background: linear-gradient(135deg, #ffd700 0%, #ffae19 50%, #fff2a3 100%);
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(180deg, #ffffff 0%, #ffd700 45%, #ff8c00 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 35px rgba(255, 165, 0, 0.45);
     margin-bottom: 0.2rem;
-    text-shadow: 0 0 25px rgba(255, 215, 0, 0.25);
+    position: relative;
+    z-index: 1;
 }
 
 .gita-subtitle {
     text-align: center;
     font-size: 1.05rem;
-    color: #94a3b8;
+    color: #d97706;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
     margin-bottom: 2rem;
-    font-style: italic;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 0 12px rgba(217, 119, 6, 0.4);
 }
 
-/* Translucent Glassmorphism Chat Bubbles */
+/* 4. Frosted Smoked-Glass Chat Cards */
 [data-testid="stChatMessage"] {
-    background: rgba(15, 23, 42, 0.65) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 215, 0, 0.15) !important;
+    background: rgba(13, 11, 20, 0.72) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 180, 50, 0.2) !important;
     border-radius: 16px !important;
-    padding: 1.2rem !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-    margin-bottom: 1rem !important;
+    padding: 1.25rem !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 140, 0, 0.05) !important;
+    margin-bottom: 1.2rem !important;
+    position: relative;
+    z-index: 1;
 }
 
-/* Floating Golden Aura for Assistant message */
+/* Golden Divine Accent on Avatar Messages */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     border-left: 3px solid #ffae19 !important;
-    box-shadow: 0 0 20px rgba(255, 174, 25, 0.08) !important;
+    box-shadow: 0 0 25px rgba(255, 140, 0, 0.15), inset 0 0 12px rgba(255, 180, 50, 0.06) !important;
 }
 
-/* Chat Input Bar */
+/* 5. Glowing Input Field */
 [data-testid="stChatInput"] {
-    background: rgba(13, 21, 39, 0.85) !important;
-    border: 1px solid rgba(255, 215, 0, 0.3) !important;
+    background: rgba(18, 14, 28, 0.85) !important;
+    border: 1px solid rgba(255, 174, 25, 0.35) !important;
     border-radius: 24px !important;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.1) !important;
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.18) !important;
 }
 
-/* Expander panel styling for verses */
+/* 6. Expandable Verse Cards */
 .streamlit-expanderHeader {
-    background: rgba(20, 30, 55, 0.5) !important;
-    border: 1px solid rgba(255, 215, 0, 0.2) !important;
+    background: rgba(26, 18, 38, 0.6) !important;
+    border: 1px solid rgba(255, 191, 0, 0.3) !important;
     border-radius: 12px !important;
-    color: #ffd700 !important;
+    color: #ffc107 !important;
+    font-weight: 600 !important;
 }
 </style>
 
-<div class="gita-title">🪷 श्रीमद्भगवद्गीता AI</div>
-<div class="gita-subtitle">"Whenever the mind wanders, bring it gently back to the Self."</div>
-""", unsafe_allow_html=True)
-
+<div class="gita-title">⚡ महावतार KRISHNA AI</div>
+<div class="gita-subtitle">Universal Counsel • Supreme Wisdom • Timeless Truth</div>
+""", unsafe_allow_html=True) 
 # Check for Groq API key in Streamlit secrets
 if "GROQ_API_KEY" not in st.secrets:
     st.error("Missing `GROQ_API_KEY`. Please set it in Streamlit: Manage app -> App settings -> Secrets.")
