@@ -93,10 +93,25 @@ def init_system():
     chroma_client = chromadb.Client()
     emb_fn = embedding_functions.DefaultEmbeddingFunction()
     
-    collection = chroma_client.create_collection(
+    collection = chroma_client.get_or_create_collection(
         name="bhagavad_gita",
         embedding_function=emb_fn
     )
+
+    # Only populate if the collection is empty (prevents duplicate ID errors on reload)
+    if collection.count() == 0:
+        documents = [
+            f"Chapter {v['chapter']}, Verse {v['verse']}. Themes: {v['theme']}. Meaning: {v['translation']}"
+            for v in GITA_VERSES
+        ]
+        metadatas = GITA_VERSES
+        ids = [v["id"] for v in GITA_VERSES]
+
+        collection.add(
+            documents=documents,
+            metadatas=metadatas,
+            ids=ids
+        )
 
     documents = [
         f"Chapter {v['chapter']}, Verse {v['verse']}. Themes: {v['theme']}. Meaning: {v['translation']}"
