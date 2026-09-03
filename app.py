@@ -8,14 +8,13 @@ import base64
 
 # --- PAGE SETUP ---
 st.set_page_config(
-    page_title="BhagavadhGPT — Divine Mentor",
+    page_title="Gita AI — Divine Mentor",
     page_icon="🪷",
     layout="centered"
 )
 
 # --- BACKGROUND IMAGE RESOLUTION ---
-# If you upload 'vishnu_bg.jpg' to your repo, it will automatically encode and use it.
-# Otherwise, it falls back to a high-res cosmic artwork URL.
+# Checks for 'vishnu_bg.jpg' in your repo first; otherwise uses a high-res cosmic fallback
 BG_IMAGE_URL = "https://images.unsplash.com/photo-1599827552599-eadf5e0a9695?q=80&w=1600&auto=format&fit=crop"
 
 if os.path.exists("vishnu_bg.jpg"):
@@ -154,7 +153,7 @@ def init_system():
     chroma_client = chromadb.Client()
     emb_fn = embedding_functions.DefaultEmbeddingFunction()
     
-    # Prevents duplicate collection errors on reload
+    # Safe retrieval to prevent duplicate constraint errors on app reload
     collection = chroma_client.get_or_create_collection(
         name="bhagavad_gita",
         embedding_function=emb_fn
