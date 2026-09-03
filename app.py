@@ -11,52 +11,69 @@ st.set_page_config(
 )
 
 # --- CINEMATIC VISUAL STYLING (CSS / CGI THEME) ---
-
+# --- CINEMATIC MAHAVATAR VISHNU BACKDROP & ORIGINAL TITLES ---
 st.markdown("""
 <style>
-/* 1. Epic Cinematic Dark & Golden Sky Background */
+/* 1. Full-screen Cinematic App Base */
 .stApp {
-    background: 
-        radial-gradient(ellipse at 50% 18%, rgba(255, 140, 0, 0.22) 0%, rgba(15, 7, 2, 0.7) 45%, rgba(4, 5, 12, 0.98) 85%),
-        linear-gradient(180deg, #07060a 0%, #0d0a14 40%, #030408 100%);
-    background-attachment: fixed;
+    background-color: #06070c;
     color: #e2e8f0;
     font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* 2. Mahavatar-style Golden Halo & Silhouette in the backdrop */
+/* 2. Mahavatar Vishnu Background Layer */
 .stApp::before {
     content: "";
     position: fixed;
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 650px;
-    height: 650px;
-    background: radial-gradient(circle, rgba(255, 191, 0, 0.28) 0%, rgba(255, 102, 0, 0.12) 40%, rgba(0,0,0,0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: 
+        radial-gradient(circle at 50% 30%, rgba(6, 7, 12, 0.4) 0%, rgba(6, 7, 12, 0.88) 85%),
+        url("https://images.unsplash.com/photo-1599827552599-eadf5e0a9695?q=80&w=1600&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    opacity: 0.32;
     z-index: 0;
-    filter: blur(40px);
-    animation: divinePulse 6s ease-in-out infinite alternate;
+    pointer-events: none;
+    filter: contrast(125%) brightness(85%);
 }
 
-@keyframes divinePulse {
-    0% { transform: translateX(-50%) scale(0.92); opacity: 0.7; }
+/* 3. Golden Cosmic Aura behind the Avatar */
+.stApp::after {
+    content: "";
+    position: fixed;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, rgba(255, 174, 25, 0.2) 0%, rgba(255, 100, 0, 0.08) 45%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(50px);
+    animation: divineGlow 7s ease-in-out infinite alternate;
+}
+
+@keyframes divineGlow {
+    0% { transform: translateX(-50%) scale(0.95); opacity: 0.6; }
     100% { transform: translateX(-50%) scale(1.15); opacity: 1; }
 }
 
-/* 3. Hero Header with Glowing Sanskrit Typography */
+/* 4. Original Sanskrit Title & Subtitle Styling */
 .gita-title {
     text-align: center;
-    font-size: 2.8rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    background: linear-gradient(180deg, #ffffff 0%, #ffd700 45%, #ff8c00 100%);
+    font-size: 2.6rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    background: linear-gradient(135deg, #ffd700 0%, #ffae19 50%, #fff2a3 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 35px rgba(255, 165, 0, 0.45);
     margin-bottom: 0.2rem;
+    text-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
     position: relative;
     z-index: 1;
 }
@@ -64,57 +81,53 @@ st.markdown("""
 .gita-subtitle {
     text-align: center;
     font-size: 1.05rem;
-    color: #d97706;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-weight: 600;
+    color: #94a3b8;
     margin-bottom: 2rem;
+    font-style: italic;
     position: relative;
     z-index: 1;
-    text-shadow: 0 0 12px rgba(217, 119, 6, 0.4);
 }
 
-/* 4. Frosted Smoked-Glass Chat Cards */
+/* 5. Glassmorphic Chat Bubbles */
 [data-testid="stChatMessage"] {
-    background: rgba(13, 11, 20, 0.72) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 180, 50, 0.2) !important;
+    background: rgba(12, 16, 28, 0.72) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(255, 215, 0, 0.18) !important;
     border-radius: 16px !important;
-    padding: 1.25rem !important;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 140, 0, 0.05) !important;
-    margin-bottom: 1.2rem !important;
+    padding: 1.2rem !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6) !important;
+    margin-bottom: 1rem !important;
     position: relative;
     z-index: 1;
 }
 
-/* Golden Divine Accent on Avatar Messages */
+/* Gold Accent on Mentor Responses */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     border-left: 3px solid #ffae19 !important;
-    box-shadow: 0 0 25px rgba(255, 140, 0, 0.15), inset 0 0 12px rgba(255, 180, 50, 0.06) !important;
+    box-shadow: 0 0 20px rgba(255, 174, 25, 0.12) !important;
 }
 
-/* 5. Glowing Input Field */
+/* 6. Chat Input */
 [data-testid="stChatInput"] {
-    background: rgba(18, 14, 28, 0.85) !important;
-    border: 1px solid rgba(255, 174, 25, 0.35) !important;
+    background: rgba(13, 19, 35, 0.88) !important;
+    border: 1px solid rgba(255, 215, 0, 0.3) !important;
     border-radius: 24px !important;
-    box-shadow: 0 0 20px rgba(255, 140, 0, 0.18) !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.12) !important;
 }
 
-/* 6. Expandable Verse Cards */
+/* 7. Shloka Expander Card */
 .streamlit-expanderHeader {
-    background: rgba(26, 18, 38, 0.6) !important;
-    border: 1px solid rgba(255, 191, 0, 0.3) !important;
+    background: rgba(18, 24, 42, 0.6) !important;
+    border: 1px solid rgba(255, 215, 0, 0.25) !important;
     border-radius: 12px !important;
-    color: #ffc107 !important;
-    font-weight: 600 !important;
+    color: #ffd700 !important;
 }
 </style>
 
-<div class="gita-title">⚡ महावतार KRISHNA AI</div>
-<div class="gita-subtitle">Universal Counsel • Supreme Wisdom • Timeless Truth</div>
-""", unsafe_allow_html=True) 
+<div class="gita-title">🪷 श्रीमद्भगवद्गीता AI</div>
+<div class="gita-subtitle">"Whenever the mind wanders, bring it gently back to the Self."</div>
+""", unsafe_allow_html=True)
 # Check for Groq API key in Streamlit secrets
 if "GROQ_API_KEY" not in st.secrets:
     st.error("Missing `GROQ_API_KEY`. Please set it in Streamlit: Manage app -> App settings -> Secrets.")
